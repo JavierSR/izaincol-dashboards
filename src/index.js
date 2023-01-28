@@ -8,9 +8,9 @@ import {
 } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-import App from './App'
 import Login from './views/Login'
 import Dashboard from './views/Dashboard'
+import Query from './views/Query'
 
 const router = createHashRouter([
   {
@@ -20,6 +20,10 @@ const router = createHashRouter([
   {
     path: '/dashboard',
     element: <Dashboard />
+  },
+  {
+    path: '/consulta-certificados',
+    element: <Query />
   }
 ])
 

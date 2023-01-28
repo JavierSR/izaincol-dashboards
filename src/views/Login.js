@@ -38,7 +38,6 @@ const Login = () => {
             route: 'login',
             data
         }).then((response) => {
-            console.log(response)
             if(response.success) {
                 navigation('/dashboard')
             }

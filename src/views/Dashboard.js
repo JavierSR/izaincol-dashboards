@@ -7,66 +7,8 @@ import ModalComponent from '../components/Modal'
 import Form from 'react-bootstrap/Form'
 import Loader from '../components/Loader'
 import request from '../helpers/request'
-
-const USER_CERTIFICATE_FIELDS = [{
-    name: 'name',
-    displayName: 'Nombres y apellidos',
-    }, {
-    name: 'document',
-    displayName: 'Documento',
-    }, {
-    name: 'scope',
-    displayName: 'Alcance',
-    }, {
-    name: 'ability',
-    displayName: 'Capacidad',
-    }, {
-    name: 'rule',
-    displayName: 'Norma',
-    }, {
-    name: 'verification_code',
-    displayName: 'Código de verificación',
-    }, {
-    name: 'expedition',
-    displayName: 'Fecha expedición',
-    }, {
-    name: 'validiy',
-    displayName: 'Vigencia',
-    }, {
-    name: 'state',
-    displayName: 'Estado',
-    }
-]
-
-const GROUP_CERTIFICATE_FIELDS = [{
-    name: 'certificate',
-    displayName: 'Certificado',
-    }, {
-    name: 'name_group',
-    displayName: 'Nombre de equipo',
-    }, {
-    name: 'type',
-    displayName: 'Tipo',
-    }, {
-    name: 'rule',
-    displayName: 'Norma',
-    }, {
-    name: 'brand',
-    displayName: 'Marca',
-    }, {
-    name: 'serie',
-    displayName: 'Serie',
-    }, {
-    name: 'model',
-    displayName: 'Modelo',
-    }, {
-    name: 'expedition_date',
-    displayName: 'Fecha expedición',
-    }, {
-    name: 'state',
-    displayName: 'Estado',
-    }
-]
+import { useNavigate } from 'react-router-dom'
+import { USER_CERTIFICATE_FIELDS, GROUP_CERTIFICATE_FIELDS } from '../constants'
 
 const EMPTY_USER_CERTIFICATE = {}
 
@@ -81,6 +23,7 @@ GROUP_CERTIFICATE_FIELDS.forEach((field) => {
 })
 
 const Dashboard = () => {
+    const navigation = useNavigate()
     const [userCertificates, setUserCertificates] = useState([])
     const [groupCertificates, setGroupCertificates] = useState([])
     const [modalOpen, setModalOpen] = useState(null)
@@ -116,10 +59,10 @@ const Dashboard = () => {
 
     const triggerUpdate = () => {
         setIsLoading(true)
-        Promise.all(
+        Promise.all([
             request({ route: 'groupcertificates&page=0' }),
             request({ route: 'usercertificates&page=0' }),
-        ).then((responses) => {
+        ]).then((responses) => {
             console.log(responses)
             const [ userResult, groupsResult ] = responses
 
@@ -129,6 +72,11 @@ const Dashboard = () => {
 
             if(groupsResult.success) {
                 setGroupCertificates(groupsResult.data)
+            }
+
+            if(userResult.message === 'invalid cookie') {
+                console.log('COOKIE NO DETECTADA')
+                // navigation('/')
             }
 
         }).finally(() => {
@@ -159,6 +107,7 @@ const Dashboard = () => {
             console.log(response)
             if(response.success) {
                 triggerUpdate()
+                closeModals()
             }
             else {
                 alert(response.message)
@@ -195,6 +144,7 @@ const Dashboard = () => {
             console.log(response)
             if(response.success) {
                 triggerUpdate()
+                closeModals()
             }
             else {
                 alert(response.message)

@@ -55,6 +55,10 @@
     overflow-x: auto;
 }
 
+.search {
+    display: flex;
+}
+
 @media screen and (max-width: 1441px) {
     .certificates {
         grid-template-columns: 100%;
