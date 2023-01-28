@@ -14,6 +14,7 @@ const Query = () => {
     const [userCertificates, setUserCertificates] = useState([])
     const [groupCertificates, setGroupCertificates] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [refreshState, setRefreshState] = useState(false)
     const location = useLocation()
 
     const handleUserChange = (event) => {
@@ -70,20 +71,30 @@ const Query = () => {
         const queryParams = new URLSearchParams(location.search)
         const user = queryParams.get('user')
         const group = queryParams.get('group')
-        
+
         if(user) {
             setUserCode(user)
-            searchUserCertificates()
+            setRefreshState('user')
         }
         else if (group) {
             setGroupCode(group)
-            searchGroupCertificates()
+            setRefreshState('group')
         }
     }
 
     useEffect(() => {
         checkParamters()
     }, [])
+
+    useEffect(() => {
+        if(refreshState === 'user') {
+            searchUserCertificates()
+        }
+        else if (refreshState === 'group') {
+            searchGroupCertificates()
+        }
+
+    }, [refreshState])
 
     return (
         <div className='dashboard'>

@@ -28,7 +28,7 @@
 
 .certificates {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     grid-gap: 2rem;
 }
 
@@ -49,6 +49,11 @@
 .certificates th {
     text-align: center;
     vertical-align: middle;
+    min-width: 100px;
+}
+
+.certificates tbody td {
+    text-align: center;
 }
 
 .certificates > div {
@@ -59,9 +64,19 @@
     display: flex;
 }
 
+.paginator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.paginator p {
+    margin: 0;
+    padding: 0 1rem;
+}
+
 @media screen and (max-width: 1441px) {
     .certificates {
-        grid-template-columns: 100%;
         grid-gap: 1rem;
     }
 }
@@ -88,6 +103,10 @@
 
     .certificates th {
         font-size: 11px;
+    }
+
+    .certificates tbody td {
+        font-size: 10px;
     }
 
     .certificates-header {

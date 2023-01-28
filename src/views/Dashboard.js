@@ -9,6 +9,7 @@ import Loader from '../components/Loader'
 import request from '../helpers/request'
 import { useNavigate } from 'react-router-dom'
 import { USER_CERTIFICATE_FIELDS, GROUP_CERTIFICATE_FIELDS } from '../constants'
+import QRCode from 'qrcode.react'
 
 const EMPTY_USER_CERTIFICATE = {}
 
@@ -32,6 +33,11 @@ const Dashboard = () => {
     const [userErrors, setUserErrors] = useState('')
     const [groupErrors, setGroupErrors] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [selectedQR, setSelectedQR] = useState(null)
+    const [pages, setPages] = useState({
+        user: 0,
+        group: 0
+    })
 
     const closeModals = () => {
         setModalOpen(null)
@@ -60,23 +66,16 @@ const Dashboard = () => {
     const triggerUpdate = () => {
         setIsLoading(true)
         Promise.all([
-            request({ route: 'groupcertificates&page=0' }),
-            request({ route: 'usercertificates&page=0' }),
+            request({ route: `usercertificates&page=${pages.user}` }),
+            request({ route: `groupcertificates&page=${pages.group}` }),
         ]).then((responses) => {
-            console.log(responses)
             const [ userResult, groupsResult ] = responses
 
-            if(userResult.success) {
-                setUserCertificates(userResult.data)
-            }
-
-            if(groupsResult.success) {
-                setGroupCertificates(groupsResult.data)
-            }
+            setUserCertificates(userResult.success ? userResult.data : [])
+            setGroupCertificates(groupsResult.success ? groupsResult.data : [])
 
             if(userResult.message === 'invalid cookie') {
-                console.log('COOKIE NO DETECTADA')
-                // navigation('/')
+                navigation('/')
             }
 
         }).finally(() => {
@@ -104,7 +103,6 @@ const Dashboard = () => {
             route: 'createusercertificates',
             data: newUserCertificate
         }).then((response) => {
-            console.log(response)
             if(response.success) {
                 triggerUpdate()
                 closeModals()
@@ -141,7 +139,6 @@ const Dashboard = () => {
             route: 'creategroupcertificates',
             data: newGroupCertificate
         }).then((response) => {
-            console.log(response)
             if(response.success) {
                 triggerUpdate()
                 closeModals()
@@ -160,11 +157,28 @@ const Dashboard = () => {
 
     useEffect(() => {
         triggerUpdate()
-    }, [])
+    }, [pages])
 
     return (
         <div className='dashboard'>
             {isLoading && <Loader />}
+            <ModalComponent
+                show={selectedQR}
+                title={`Consulta de certificado para ${selectedQR?.name || selectedQR?.name_group}`}
+                handleClose={() => setSelectedQR(null)}
+                errors=''
+                showFooter={false}
+            >
+                <div className='d-flex justify-content-center'>
+                    <QRCode 
+                        renderAs='canvas' 
+                        level='H'
+                        includeMargin={true}
+                        value={`${window.location.host}/#/consulta-certificados?${selectedQR?.document ? 'user' : 'group'}=${selectedQR?.document || selectedQR?.certificate}`}
+                        size={256}
+                    />
+                </div>
+            </ModalComponent>
             <div className='shadow rounded bg-white dashboard-container dashboard-inner-container'>
                 <div className='dashboard-header mb-5'>
                     <h2>Administración de certificados</h2>
@@ -181,6 +195,7 @@ const Dashboard = () => {
                                 handleClose={closeModals}
                                 handleClick={saveUserCertificate}
                                 errors={userErrors}
+                                showFooter={true}
                             >
                                 <Form>
                                     {USER_CERTIFICATE_FIELDS.map((field, index) => (
@@ -203,6 +218,7 @@ const Dashboard = () => {
                                     {USER_CERTIFICATE_FIELDS.map((field, index) => (
                                         <th key={index}>{field.displayName}</th>
                                     ))}
+                                    <th>QR</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -217,10 +233,16 @@ const Dashboard = () => {
                                         <td>{value?.expedition}</td>
                                         <td>{value?.validity}</td>
                                         <td>{value?.state}</td>
+                                        <td><Button onClick={() => setSelectedQR(value)} variant='warning'>Ver</Button></td>
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
+                        <div className='paginator'>
+                            <Button onClick={() => setPages({...pages, user: --pages.user})} disabled={pages.user === 0} variant='warning'>{'<'}</Button>
+                            <p>Página {pages.user + 1}</p>
+                            <Button onClick={() => setPages({...pages, user: ++pages.user})} variant='warning'>{'>'}</Button>
+                        </div>
                     </div>
                     <div className='dashboard-container'>
                         <div className='certificates-header'>
@@ -232,6 +254,7 @@ const Dashboard = () => {
                                 handleClose={closeModals}
                                 handleClick={saveGroupCertificate}
                                 errors={groupErrors}
+                                showFooter={true}
                             >
                                 <Form>
                                     {GROUP_CERTIFICATE_FIELDS.map((field, index) => (
@@ -254,6 +277,7 @@ const Dashboard = () => {
                                     {GROUP_CERTIFICATE_FIELDS.map((field, index) => (
                                         <th key={index}>{field.displayName}</th>
                                     ))}
+                                    <th>QR</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -268,10 +292,16 @@ const Dashboard = () => {
                                         <td>{value?.model}</td>
                                         <td>{value?.validity}</td>
                                         <td>{value?.expedition_date}</td>
+                                        <td><Button onClick={() => setSelectedQR(value)} variant='warning'>Ver</Button></td>
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
+                        <div className='paginator'>
+                            <Button onClick={() => setPages({...pages, group: --pages.group})} disabled={pages.group === 0} variant='warning'>{'<'}</Button>
+                            <p>Página {pages.group + 1}</p>
+                            <Button onClick={() => setPages({...pages, group: ++pages.group})} variant='warning'>{'>'}</Button>
+                        </div>
                     </div>
                 </div>
             </div>
