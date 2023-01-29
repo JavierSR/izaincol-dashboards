@@ -178,7 +178,6 @@ const Query = () => {
                                         <td>{value?.brand}</td>
                                         <td>{value?.serie}</td>
                                         <td>{value?.model}</td>
-                                        <td>{value?.validity}</td>
                                         <td>{value?.expedition_date}</td>
                                     </tr>
                                 ))}

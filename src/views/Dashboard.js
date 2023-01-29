@@ -10,6 +10,7 @@ import request from '../helpers/request'
 import { useNavigate } from 'react-router-dom'
 import { USER_CERTIFICATE_FIELDS, GROUP_CERTIFICATE_FIELDS } from '../constants'
 import QRCode from 'qrcode.react'
+import Cookies from 'js-cookie'
 
 const EMPTY_USER_CERTIFICATE = {}
 
@@ -154,6 +155,11 @@ const Dashboard = () => {
             setIsLoading(false)
         })
     }
+    
+    const closeSeccion = () => {
+        Cookies.remove('IZAIIIIII')
+        navigation('/')
+    }
 
     useEffect(() => {
         triggerUpdate()
@@ -180,6 +186,10 @@ const Dashboard = () => {
                 </div>
             </ModalComponent>
             <div className='shadow rounded bg-white dashboard-container dashboard-inner-container'>
+                <div className='dashboard-header mb-5'>
+                    <p></p>
+                    <Button onClick={() => closeSeccion()} variant='warning'>Cerrar sesion</Button>
+                </div>
                 <div className='dashboard-header mb-5'>
                     <h2>Administración de certificados</h2>
                     <img src={Logo} />
