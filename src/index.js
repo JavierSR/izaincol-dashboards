@@ -10,7 +10,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 import Login from './views/Login'
 import Dashboard from './views/Dashboard'
-import Query from './views/Query'
+import PersonQuery from './views/PersonQuery'
+import GroupQuery from './views/GroupQuery'
 
 const router = createHashRouter([
   {
@@ -22,9 +23,13 @@ const router = createHashRouter([
     element: <Dashboard />
   },
   {
-    path: '/consulta-certificados',
-    element: <Query />
-  }
+    path: '/consulta-certificados-persona',
+    element: <PersonQuery />
+  },
+  {
+    path: '/consulta-certificados-equipo',
+    element: <GroupQuery />
+  },
 ])
 
 

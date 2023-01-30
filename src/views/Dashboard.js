@@ -8,23 +8,16 @@ import Form from 'react-bootstrap/Form'
 import Loader from '../components/Loader'
 import request from '../helpers/request'
 import { useNavigate } from 'react-router-dom'
-import { USER_CERTIFICATE_FIELDS, GROUP_CERTIFICATE_FIELDS } from '../constants'
+import { USER_CERTIFICATE_FIELDS, GROUP_CERTIFICATE_FIELDS, HOST_NAME } from '../constants'
 import QRCode from 'qrcode.react'
 import Cookies from 'js-cookie'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { fillDefaultValues } from '../helpers/filler'
 
-const EMPTY_USER_CERTIFICATE = {}
+const EMPTY_USER_CERTIFICATE = fillDefaultValues(USER_CERTIFICATE_FIELDS)
 
-USER_CERTIFICATE_FIELDS.forEach((field) => {
-    EMPTY_USER_CERTIFICATE[field.name] = field.type === 'date' ? new Date() : ''
-})
-
-const EMPTY_GROUP_CERTIFICATE = {}
-
-GROUP_CERTIFICATE_FIELDS.forEach((field) => {
-    EMPTY_GROUP_CERTIFICATE[field.name] = field.type === 'date' ? new Date() : ''
-})
+const EMPTY_GROUP_CERTIFICATE = fillDefaultValues(GROUP_CERTIFICATE_FIELDS)
 
 const Dashboard = () => {
     const navigation = useNavigate()
@@ -92,7 +85,7 @@ const Dashboard = () => {
             setGroupCertificates(groupsResult.success ? groupsResult.data : [])
 
             if(userResult.message === 'invalid cookie') {
-                navigation('/')
+                // navigation('/')
             }
 
         }).finally(() => {
@@ -172,7 +165,7 @@ const Dashboard = () => {
         })
     }
     
-    const closeSeccion = () => {
+    const logOut = () => {
         Cookies.remove('IZAIIIIII')
         navigation('/')
     }
@@ -181,6 +174,76 @@ const Dashboard = () => {
         triggerUpdate()
     }, [pages])
 
+    const renderUserInputType = (field) => {
+        switch(field.type) {
+            case 'date':
+                return (
+                    <DatePicker
+                        className='form-control'
+                        selected={newUserCertificate[field.name]}
+                        onChange={(date) => handleUserDateChange(date, field.name)}
+                        showMonthDropdown
+                        showYearDropdown
+                        scrollableYearDropdown
+                    />
+                )
+
+            case 'select':
+                return (
+                    <Form.Select onChange={handleChangeUser} name={field.name}>
+                        {field.options.map((option, index) => (
+                            <option key={index} value={option}>{option}</option>
+                        ))}
+                    </Form.Select>
+                )
+
+            default:
+                return (
+                    <Form.Control
+                        type={field.type}
+                        name={field.name}
+                        value={newUserCertificate[field.name]}
+                        onChange={handleChangeUser}
+                    />
+                )
+        }
+    }
+
+    const renderGroupInputType = (field) => {
+        switch(field.type) {
+            case 'date':
+                return (
+                    <DatePicker
+                        className='form-control'
+                        selected={newGroupCertificate[field.name]}
+                        onChange={(date) => handleGroupDateChange(date, field.name)}
+                        showMonthDropdown
+                        showYearDropdown
+                        scrollableYearDropdown
+                    />
+                )
+
+            case 'select':
+                return (
+                    <Form.Select onChange={handleChangeGroup} name={field.name}>
+                        {field.options.map((option, index) => (
+                            <option key={index} value={option}>{option}</option>
+                        ))}
+                    </Form.Select>
+                )
+
+            default:
+                return (
+                    <Form.Control
+                        type={field.type}
+                        name={field.name}
+                        value={newGroupCertificate[field.name]}
+                        onChange={handleChangeGroup}
+                    />
+                )
+        }
+    }
+    
     return (
         <div className='dashboard'>
             {isLoading && <Loader />}
@@ -196,7 +259,11 @@ const Dashboard = () => {
                         renderAs='canvas' 
                         level='H'
                         includeMargin={true}
-                        value={`${window.location.host}/#/consulta-certificados?${selectedQR?.document ? 'user' : 'group'}=${selectedQR?.document || selectedQR?.certificate}`}
+                        value={selectedQR?.document ?
+                            `${HOST_NAME}/#/consulta-certificados-persona?document=${selectedQR?.document}&code=${selectedQR?.verification_code}`
+                            :
+                            `${HOST_NAME}/#/consulta-certificados-equipo?group=${selectedQR?.certificate}`
+                        }
                         size={256}
                     />
                 </div>
@@ -204,7 +271,7 @@ const Dashboard = () => {
             <div className='shadow rounded bg-white dashboard-container dashboard-inner-container'>
                 <div className='dashboard-header mb-5'>
                     <p></p>
-                    <Button onClick={() => closeSeccion()} variant='warning'>Cerrar sesion</Button>
+                    <Button onClick={() => logOut()} variant='warning'>Cerrar sesion</Button>
                 </div>
                 <div className='dashboard-header mb-5'>
                     <h2>Administración de certificados</h2>
@@ -213,7 +280,7 @@ const Dashboard = () => {
                 <div className='certificates'>
                     <div className='dashboard-container'>
                         <div className='certificates-header'>
-                            <h4>Certificados por usuario</h4>
+                            <h4>Certificados por persona</h4>
                             <Button onClick={() => openModal('USER')} variant='warning'>Agregar</Button>
                             <ModalComponent
                                 show={modalOpen === 'USER'}
@@ -227,26 +294,13 @@ const Dashboard = () => {
                                     {USER_CERTIFICATE_FIELDS.map((field, index) => (
                                         <Form.Group key={index} className='mb-2'>
                                             <Form.Label>{field.displayName}</Form.Label>
-                                            {field.type === 'date' ? (
-                                                <DatePicker
-                                                    className='form-control'
-                                                    selected={newUserCertificate[field.name]}
-                                                    onChange={(date) => handleUserDateChange(date, field.name)}
-                                                />
-                                            ) : 
-                                                <Form.Control
-                                                    type='text'
-                                                    name={field.name}
-                                                    value={newUserCertificate[field.name]}
-                                                    onChange={handleChangeUser}
-                                                />
-                                            }
+                                            {renderUserInputType(field)}
                                         </Form.Group>
                                     ))}
                                 </Form>
                             </ModalComponent>
                         </div>
-                        <Table striped bordered hover variant='dark'>
+                        <Table bordered hover variant='dark'>
                             <thead>
                                 <tr>
                                     {USER_CERTIFICATE_FIELDS.map((field, index) => (
@@ -255,7 +309,7 @@ const Dashboard = () => {
                                     <th>QR</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className='custom-table'>
                                 {userCertificates.map((value, index) => (
                                     <tr key={index}>
                                         <td>{value?.name}</td>
@@ -280,7 +334,7 @@ const Dashboard = () => {
                     </div>
                     <div className='dashboard-container'>
                         <div className='certificates-header'>
-                            <h4>Certificados por grupo</h4>
+                            <h4>Certificados por equipo</h4>
                             <Button onClick={() => openModal('GROUP')} variant='warning'>Agregar</Button>
                             <ModalComponent
                                 show={modalOpen === 'GROUP'}
@@ -294,27 +348,13 @@ const Dashboard = () => {
                                     {GROUP_CERTIFICATE_FIELDS.map((field, index) => (
                                         <Form.Group key={index} className='mb-2'>
                                             <Form.Label>{field.displayName}</Form.Label>
-                                            {field.type === 'date' ? (
-                                                <DatePicker
-                                                    className='form-control'
-                                                    selected={newGroupCertificate[field.name]}
-                                                    onChange={(date) => handleGroupDateChange(date, field.name)}
-                                                />
-                                            ) : 
-                                                <Form.Control
-                                                    type='text'
-                                                    name={field.name}
-                                                    value={newGroupCertificate[field.name]}
-                                                    onChange={handleChangeGroup}
-                                                />
-                                            }
-                                            
+                                            {renderGroupInputType(field)}
                                         </Form.Group>
                                     ))}
                                 </Form>
                             </ModalComponent>
                         </div>
-                        <Table striped bordered hover variant='dark'>
+                        <Table bordered hover variant='dark'>
                             <thead>
                                 <tr>
                                     {GROUP_CERTIFICATE_FIELDS.map((field, index) => (
@@ -323,7 +363,7 @@ const Dashboard = () => {
                                     <th>QR</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className='custom-table'>
                                 {groupCertificates.map((value, index) => (
                                     <tr key={index}>
                                         <td>{value?.certificate}</td>

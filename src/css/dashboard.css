@@ -1,5 +1,5 @@
 .dashboard {
-    width: 100vw;
+    max-width: 100vw;
 }
 
 .dashboard-container {
@@ -23,7 +23,7 @@
 }
 
 .dashboard-header img {
-    max-width: 400px;
+    max-width: 550px;
 }
 
 .certificates {
@@ -60,8 +60,17 @@
     overflow-x: auto;
 }
 
-.search {
+.certificates p {
+    text-align: right;
+    padding-right: 0.5rem;
+}
+
+.search, .search form {
     display: flex;
+}
+
+.search form input {
+    margin-right: 1rem;
 }
 
 .paginator {
@@ -79,9 +88,18 @@
     width: 100%;
 }
 
+.custom-table td {
+    background-color: #B2BABB;
+    color: var(--bs-table-bg);
+}
+
 @media screen and (max-width: 1441px) {
     .certificates {
         grid-gap: 1rem;
+    }
+
+    .dashboard-header img {
+        max-width: 400px;
     }
 }
 
@@ -115,5 +133,17 @@
 
     .certificates-header {
         align-items: center;
+    }
+
+    .search {
+        margin: auto
+    }
+
+    .search, .search form {
+        flex-direction: column;
+    }
+
+    .search input {
+        margin-bottom: 8px;
     }
 }

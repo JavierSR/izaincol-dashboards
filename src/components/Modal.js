@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 
 const ModalComponent = ({ show, title, handleClose, handleClick, children, errors, showFooter }) => (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} backdrop='static'>
         <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
