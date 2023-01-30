@@ -75,6 +75,10 @@
     padding: 0 1rem;
 }
 
+.date-picker {
+    width: 100%;
+}
+
 @media screen and (max-width: 1441px) {
     .certificates {
         grid-gap: 1rem;

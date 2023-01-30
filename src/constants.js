@@ -19,9 +19,11 @@ export const USER_CERTIFICATE_FIELDS = [{
     }, {
     name: 'expedition',
     displayName: 'Fecha expedición',
+    type: 'date'
     }, {
-    name: 'validiy',
+    name: 'validity',
     displayName: 'Vigencia',
+    type: 'date'
     }, {
     name: 'state',
     displayName: 'Estado',
@@ -52,8 +54,6 @@ export const GROUP_CERTIFICATE_FIELDS = [{
     }, {
     name: 'expedition_date',
     displayName: 'Fecha expedición',
-    }, {
-    name: 'state',
-    displayName: 'Estado',
+    type: 'date'
     }
 ]

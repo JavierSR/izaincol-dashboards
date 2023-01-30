@@ -11,17 +11,19 @@ import { useNavigate } from 'react-router-dom'
 import { USER_CERTIFICATE_FIELDS, GROUP_CERTIFICATE_FIELDS } from '../constants'
 import QRCode from 'qrcode.react'
 import Cookies from 'js-cookie'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 const EMPTY_USER_CERTIFICATE = {}
 
 USER_CERTIFICATE_FIELDS.forEach((field) => {
-    EMPTY_USER_CERTIFICATE[field.name] = ''
+    EMPTY_USER_CERTIFICATE[field.name] = field.type === 'date' ? new Date() : ''
 })
 
 const EMPTY_GROUP_CERTIFICATE = {}
 
 GROUP_CERTIFICATE_FIELDS.forEach((field) => {
-    EMPTY_GROUP_CERTIFICATE[field.name] = ''
+    EMPTY_GROUP_CERTIFICATE[field.name] = field.type === 'date' ? new Date() : ''
 })
 
 const Dashboard = () => {
@@ -64,6 +66,20 @@ const Dashboard = () => {
         })
     }
 
+    const handleUserDateChange = (date, fieldName) => {
+        setNewUserCertificate({
+            ...newUserCertificate,
+            [fieldName]: date
+        })
+    }
+
+    const handleGroupDateChange = (date, fieldName) => {
+        setNewGroupCertificate({
+            ...newGroupCertificate,
+            [fieldName]: date
+        })
+    }
+
     const triggerUpdate = () => {
         setIsLoading(true)
         Promise.all([
@@ -89,7 +105,7 @@ const Dashboard = () => {
         let emptyFields = []
         USER_CERTIFICATE_FIELDS.forEach((field) => {
             const value = newUserCertificate[field.name]
-            if(!value.length) {
+            if(!value.length && field.type !== 'date') {
                 emptyFields = [...emptyFields, field.displayName]
             }
         })
@@ -125,7 +141,7 @@ const Dashboard = () => {
         let emptyFields = []
         GROUP_CERTIFICATE_FIELDS.forEach((field) => {
             const value = newGroupCertificate[field.name]
-            if(!value.length) {
+            if(!value.length && field.type !== 'date') {
                 emptyFields = [...emptyFields, field.displayName]
             }
         })
@@ -211,12 +227,20 @@ const Dashboard = () => {
                                     {USER_CERTIFICATE_FIELDS.map((field, index) => (
                                         <Form.Group key={index} className='mb-2'>
                                             <Form.Label>{field.displayName}</Form.Label>
-                                            <Form.Control
-                                                type='text'
-                                                name={field.name}
-                                                value={newUserCertificate[field.name]}
-                                                onChange={handleChangeUser}
-                                            />
+                                            {field.type === 'date' ? (
+                                                <DatePicker
+                                                    className='form-control'
+                                                    selected={newUserCertificate[field.name]}
+                                                    onChange={(date) => handleUserDateChange(date, field.name)}
+                                                />
+                                            ) : 
+                                                <Form.Control
+                                                    type='text'
+                                                    name={field.name}
+                                                    value={newUserCertificate[field.name]}
+                                                    onChange={handleChangeUser}
+                                                />
+                                            }
                                         </Form.Group>
                                     ))}
                                 </Form>
@@ -270,12 +294,21 @@ const Dashboard = () => {
                                     {GROUP_CERTIFICATE_FIELDS.map((field, index) => (
                                         <Form.Group key={index} className='mb-2'>
                                             <Form.Label>{field.displayName}</Form.Label>
-                                            <Form.Control
-                                                type='text'
-                                                name={field.name}
-                                                value={newGroupCertificate[field.name]}
-                                                onChange={handleChangeGroup}
-                                            />
+                                            {field.type === 'date' ? (
+                                                <DatePicker
+                                                    className='form-control'
+                                                    selected={newGroupCertificate[field.name]}
+                                                    onChange={(date) => handleGroupDateChange(date, field.name)}
+                                                />
+                                            ) : 
+                                                <Form.Control
+                                                    type='text'
+                                                    name={field.name}
+                                                    value={newGroupCertificate[field.name]}
+                                                    onChange={handleChangeGroup}
+                                                />
+                                            }
+                                            
                                         </Form.Group>
                                     ))}
                                 </Form>
@@ -300,7 +333,6 @@ const Dashboard = () => {
                                         <td>{value?.brand}</td>
                                         <td>{value?.serie}</td>
                                         <td>{value?.model}</td>
-                                        <td>{value?.validity}</td>
                                         <td>{value?.expedition_date}</td>
                                         <td><Button onClick={() => setSelectedQR(value)} variant='warning'>Ver</Button></td>
                                     </tr>
